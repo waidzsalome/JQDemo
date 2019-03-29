@@ -184,18 +184,75 @@
 
     <script src="resource/jquery-3.3.1.js"></script>
     <script>
+        const Scroll = {};
+
         (function (win,doc,$) {
             function CusScrollBar(options) {
                 this._init(options);
             }
             $.extend(CusScrollBar.prototype,{
-                _init:function () {
-                    console.log("test1");
+                _init:function (options) {
+                    let self = this;
+                    self.options = {
+                        scrollDir: "y",
+                        contSelector: "",
+                        barSelector: "",
+                        sliderSelector: ""
+                    };
+                    $.extend(true,self.options,options||{});
+                    console.log(self.options);
+                    self._initDomEvent();
+                    return self;
+                },
+
+                _initDomEvent : function () {
+                    let opts = this.options;
+                    this.$cont = $(opts.contSelector);
+                    this.$slider = $(opts.sliderSelector);
+                    this.$bar = opts.barSelector ? $(opts.barSelector) : self.$slider.parent();
+                    this.$doc = $(doc);
+                    this._initSliderDragEvent();
+                },
+                
+                _initSliderDragEvent : function () {
+                    let slider = this.$slider;
+                    sliderEl = slider[0];
+                    if(sliderEl) {
+                        let doc = this.$doc,
+                            dragStartPagePosition,
+                            dragStartScrollPosition,
+                            dragContBarRate;
+                        slider.on("mousedown",function (e) {
+                            e.preventDefault();
+                            console.log("mousedown");
+                            doc.on("mousemove.scroll",function (e) {
+                                console.log("mousemove");
+                            }).on("mouseup.scroll",function (e) {
+                                console.log("mouseup");
+                                doc.off(".scroll")
+                            })
+                        })
+                    }
                 }
+
             });
-            win.CusScrollBar = CusScrollBar;
+            Scroll.CusScrollBar = CusScrollBar;
         })(window,document,jQuery);
-        new CusScrollBar();
+
+        let scroll = new Scroll.CusScrollBar({
+            contSelector: ".scroll-wrap",
+            barSelector: ".scroll-bar",
+            sliderSelector: ".scroll-slider"
+        });
+
+        let scroll2 = new Scroll.CusScrollBar({
+            contSelector: ".scroll-wrap-2",
+            barSelector: ".scroll-bar-2",
+            sliderSelector: ".scroll-slider-2"
+        });
+
+        console.log(scroll);
+        console.log(scroll2);
     </script>
 
 </body>
