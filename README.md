@@ -32,11 +32,25 @@ jQuery.extend([deep],target,object1[,objectN])
 ```bash
 .on(events[,selector][,data],handler(eventObject))
 ```
+### jQuery事件对象属性
+```bash
+event.pageX()
+鼠标相对于文档左侧的边缘的距离
+event.pageY()
+鼠标相对于文档顶部边缘的距离
+```
 
+### 元素属性
+```bash
+div.scrollTop
+“元素中的内容”超出“元素上边界”的那部分高度（像素数）
+div.scrollLeft
+“元素中的内容”超出“元素左边界”的那部分高度（像素数）
+```
 ## 一丢丢JS相关
 
-### prtotype
-proptotype 属性向对象添加属性和方法
+### prototype
+prototype 属性向对象添加属性和方法
 
 ### $.fn或jquery.fn
 $.fn是指jquery的命名空间
@@ -54,3 +68,11 @@ var o = {};
 ```
 - 执行构造函数中的代码（为这个新对象添加属性）
 - 返回新对象
+
+console.log("_initDomEvent")
+console.log("_initSliderDragEvent")
+console.log("_bindContScroll")
+console.log("getSliderPosition")
+console.log("getMaxScrollPosition")
+console.log("getMaxSliderPosition")
+console.log("scrollTo")

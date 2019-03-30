@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>scroll</title>
     <link rel="stylesheet" type="text/css" href="resource/reset.css">
-    <style type="text/css">
+    <style>
         body{
             background: #ccc;
         }
@@ -140,13 +140,6 @@
                         是一个可以辩论的问题，而只是上帝交给他的一个事实；上帝在交给我们这件事
                         实的时候，已经顺便保证了它的结果，所以死是一件不必急于求成的事，死是一
                         个必然会降临的节日。</P>
-                    <P>这样想过之后我安心多了，眼前的一切不再那么可怕。比如你起早熬夜准备考试的
-                        时候，忽然想起有一个长长的假期在前面等待你，你会不会觉得轻松一点?并且庆
-                        幸并且感激这样的安排?剩下的就是怎样活的问题了，这却不是在某一个瞬间就能
-                        完全想透的，不是一次性能够解决的事，怕是活多久就要想它多久了，就像是伴你
-                        终生的魔鬼或恋人。所以，十五年了，我还是总得到那古园里去，去它的老树下或
-                        荒草边或颓墙旁，去默坐，去呆想，去推开耳边的嘈杂理一理纷乱的思绪，去窥看
-                        自己的心魂。</P>
                     <P></P>
                 </div>
                 <h3 class="anchor">冬天来了</h3>
@@ -164,14 +157,6 @@
                         楚的。味道不能写只能闻，要你身临其境去闻才能明了。味道甚至是难于记忆的，只
                         有你又闻到它你才能记起它的全部情感和意蕴。所以我常常要到那园子里去。</P>
                     <P>现在我才想到，当年我总是独自跑到地坛去，曾经给母亲出了一个怎样的难题。</P>
-                    <P>她不是那种光会疼爱儿子而不懂得理解儿子的母亲。她知道我心里的苦闷，知道不该阻
-                        止我出去走走，知道我要是老呆在家里结果会更糟，但她又担心我一个人在那荒僻的园
-                        子里整天都想些什么。我那时脾气坏到极点，经常是发了疯一样地离开家，从那园子里
-                        回来又中了魔似的什么话都不说。母亲知道有些事不宜问，便犹犹豫豫地想问而终于不
-                        敢问，因为她自己心里也没有答案。她料想我不会愿意她跟我一同去，所以她从未这样
-                        要求过，她知道得给我一点独处的时间，得有这样一段过程。她只是不知道这过程得要
-                        多久，和这过程的尽头究竟是什么。每次我要动身时，她便无言地帮我准备，帮助我上
-                        了轮椅车，看着我摇车拐出小院；这以后她会怎样，当年我不曾想过</P>
                 </div>
             </div>
             <!--滚动条-->
@@ -184,8 +169,6 @@
 
     <script src="resource/jquery-3.3.1.js"></script>
     <script>
-        const Scroll = {};
-
         (function (win,doc,$) {
             function CusScrollBar(options) {
                 this._init(options);
@@ -199,60 +182,117 @@
                         barSelector: "",
                         sliderSelector: ""
                     };
-                    $.extend(true,self.options,options||{});
-                    console.log(self.options);
+                    $.extend(true, self.options, options || {} );
+                    // console.log(self.options);
                     self._initDomEvent();
                     return self;
                 },
 
                 _initDomEvent : function () {
+                    console.log("_initDomEvent")
                     let opts = this.options;
                     this.$cont = $(opts.contSelector);
                     this.$slider = $(opts.sliderSelector);
-                    this.$bar = opts.barSelector ? $(opts.barSelector) : self.$slider.parent();
+                    this.$bar = opts.barSelector
+                        ? $(opts.barSelector)
+                        : self.$slider.parent();
                     this.$doc = $(doc);
-                    this._initSliderDragEvent();
+                    this._initSliderDragEvent()
+                        ._bindContScroll();
                 },
-                
+
                 _initSliderDragEvent : function () {
-                    let slider = this.$slider;
-                    sliderEl = slider[0];
+                    console.log("_initSliderDragEvent")
+                    let slider = this.$slider,
+                    sliderEl = slider[0],
+                    self = this;
                     if(sliderEl) {
                         let doc = this.$doc,
                             dragStartPagePosition,
                             dragStartScrollPosition,
                             dragContBarRate;
+                        function mousemoveHandler(e){
+                            e.preventDefault();
+                            console.log("mousemove");
+                            if(dragStartPagePosition == null) {
+                                return;
+                            }
+
+                             self.scrollTo(dragStartScrollPosition +
+                                (e.pageY - dragStartPagePosition) * dragContBarRate
+                            );
+                            console.log('state',dragStartScrollPosition,dragStartPagePosition,dragContBarRate)
+                        }
                         slider.on("mousedown",function (e) {
                             e.preventDefault();
                             console.log("mousedown");
-                            doc.on("mousemove.scroll",function (e) {
-                                console.log("mousemove");
-                            }).on("mouseup.scroll",function (e) {
+                            dragStartPagePosition = e.pageY;
+                            dragStartScrollPosition = self.$cont[0].scrollTop;
+                            dragContBarRate = self.getMaxScrollPosition() / self.getMaxSliderPosition();
+                            doc.on("mousemove.scroll",
+                                mousemoveHandler
+                            ).on("mouseup.scroll",function (e) {
                                 console.log("mouseup");
-                                doc.off(".scroll")
-                            })
-                        })
+                                doc.off(".scroll");
+                            });
+                        });
                     }
+                    return self;
+                },
+                // 监听内容的滚动，同步滑块的位置
+                _bindContScroll : function () {
+                    console.log("_bindContScroll")
+                  let self = this;
+                  self.$cont.on("scroll",function () {
+                      let sliderEl = self.$slider && self.$slider[0];
+                      if(sliderEl){
+                          sliderEl.style.top = self.getSliderPosition() + "px";
+                      }
+                  });
+                  return self;
+                },
+                // 计算滑块当前的位置
+                getSliderPosition : function (){
+                  console.log("getSliderPosition")
+                  let self = this,
+                  maxSliderPosition = self.getMaxSliderPosition();
+                  return Math.min(maxSliderPosition,
+                      maxSliderPosition * self.$cont[0].scrollTop /
+                      self.getMaxScrollPosition()
+                  );
+                },
+
+                // 内容可移动高度
+                getMaxScrollPosition : function () {
+                    console.log("getMaxScrollPosition")
+                    let self = this;
+                    return Math.max(self.$cont.height(),self.$cont[0].scrollHeight -
+                        self.$cont.height()
+                    );
+                },
+                // 滑块可移动距离
+                getMaxSliderPosition: function () {
+                    console.log("getMaxSliderPosition")
+                    let self = this;
+                    return self.$bar.height() - self.$slider.height();
+                },
+
+                scrollTo : function (positionVal) {
+                    console.log("scrollTo")
+                    let self = this;
+                    self.$cont.scrollTop(positionVal);
+
                 }
 
             });
-            Scroll.CusScrollBar = CusScrollBar;
+            win.CusScrollBar = CusScrollBar;
         })(window,document,jQuery);
 
-        let scroll = new Scroll.CusScrollBar({
-            contSelector: ".scroll-wrap",
+        let scroll = new CusScrollBar({
+            contSelector: ".scroll-cont",
             barSelector: ".scroll-bar",
             sliderSelector: ".scroll-slider"
         });
-
-        let scroll2 = new Scroll.CusScrollBar({
-            contSelector: ".scroll-wrap-2",
-            barSelector: ".scroll-bar-2",
-            sliderSelector: ".scroll-slider-2"
-        });
-
-        console.log(scroll);
-        console.log(scroll2);
     </script>
 
 </body>
